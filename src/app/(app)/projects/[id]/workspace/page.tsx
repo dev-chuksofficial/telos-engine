@@ -5,6 +5,8 @@ import { requireUserId } from "@/lib/dal";
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Workspace } from "@/components/workspace/Workspace";
 
+export const maxDuration = 300;
+
 export default async function WorkspacePage({
   params,
 }: {

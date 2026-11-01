@@ -13,6 +13,8 @@ import { AiActionButton } from "@/components/ui/AiActionButton";
 import { ButtonLink } from "@/components/ui/Button";
 import { DeployPanel } from "@/components/deploy/DeployPanel";
 
+export const maxDuration = 300;
+
 const STATUS_LABELS: Record<string, string> = {
   DRAFT: "Draft",
   ANALYZED: "Analyzed",
