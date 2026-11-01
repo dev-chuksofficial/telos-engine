@@ -1,0 +1,107 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum ProjectStatus {
+  DRAFT
+  ANALYZED
+  BUILDING
+  READY
+  DEPLOYED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+model User {
+  id           String    @id @default(cuid())
+  name         String
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  projects     Project[]
+}
+
+model Project {
+  id           String          @id @default(cuid())
+  name         String
+  description  String
+  status       ProjectStatus   @default(DRAFT)
+  requirements Json?
+  architecture Json?
+  subdomain    String?         @unique
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  userId       String
+  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  files        ProjectFile[]
+  versions     ProjectVersion[]
+  messages     ChatMessage[]
+  memories     ProjectMemory[]
+  deployments  Deployment[]
+
+  @@index([userId])
+}
+
+model ProjectFile {
+  id        String   @id @default(cuid())
+  path      String
+  content   String   @db.Text
+  updatedAt DateTime @updatedAt
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, path])
+}
+
+model ProjectVersion {
+  id        String   @id @default(cuid())
+  label     String
+  snapshot  Json
+  createdAt DateTime @default(now())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  role      MessageRole
+  content   String      @db.Text
+  createdAt DateTime    @default(now())
+  projectId String
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model ProjectMemory {
+  id        String   @id @default(cuid())
+  key       String
+  value     String   @db.Text
+  createdAt DateTime @default(now())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
+
+model Deployment {
+  id        String   @id @default(cuid())
+  status    String
+  url       String?
+  createdAt DateTime @default(now())
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+}
